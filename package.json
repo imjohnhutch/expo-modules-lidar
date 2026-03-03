@@ -1,0 +1,53 @@
+{
+  "name": "expo-lidar",
+  "version": "0.1.0",
+  "description": "Expo module for Apple LiDAR depth sensing — capture depth frames, measure real-world dimensions, and export 3D meshes using ARKit.",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "tsc",
+    "clean": "rm -rf build"
+  },
+  "keywords": [
+    "expo",
+    "expo-module",
+    "lidar",
+    "arkit",
+    "depth",
+    "3d",
+    "ios",
+    "react-native",
+    "ar",
+    "mesh",
+    "point-cloud",
+    "depth-map"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/imjohnhutch/expo-modules-lidar.git"
+  },
+  "bugs": {
+    "url": "https://github.com/imjohnhutch/expo-modules-lidar/issues"
+  },
+  "homepage": "https://github.com/imjohnhutch/expo-modules-lidar#readme",
+  "author": "John Hutchison <imjohnhutch@gmail.com>",
+  "license": "MIT",
+  "peerDependencies": {
+    "expo": ">=52.0.0",
+    "react": ">=18.0.0",
+    "react-native": ">=0.76.0"
+  },
+  "devDependencies": {
+    "expo-modules-core": ">=2.0.0",
+    "typescript": "^5.0.0"
+  },
+  "files": [
+    "build",
+    "src",
+    "ios",
+    "android",
+    "expo-module.config.json",
+    "ExpoLidar.podspec"
+  ]
+}

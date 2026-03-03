@@ -1,0 +1,8 @@
+example/
+.git/
+.github/
+*.md
+!README.md
+tsconfig.json
+.gitignore
+.DS_Store
