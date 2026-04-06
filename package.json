@@ -2,8 +2,8 @@
   "name": "expo-lidar",
   "version": "0.1.0",
   "description": "Expo module for Apple LiDAR depth sensing — capture depth frames, measure real-world dimensions, and export 3D meshes using ARKit.",
-  "main": "build/index.js",
-  "types": "build/index.d.ts",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "tsc",

@@ -7,6 +7,13 @@ public class LiDARSessionModule: Module {
     private var arSession: ARSession?
     private var sessionDelegate: LiDARSessionDelegate?
 
+    /// Returns the view's shared session if available, otherwise falls back
+    /// to the module's own session. This avoids two ARSessions competing
+    /// for the camera (which freezes the preview).
+    private var activeSession: ARSession? {
+        return SharedARSession.shared.viewSession ?? arSession
+    }
+
     public func definition() -> ModuleDefinition {
         Name("ExpoLidar")
 
@@ -24,6 +31,12 @@ public class LiDARSessionModule: Module {
         // MARK: - Session Lifecycle
 
         AsyncFunction("startSession") { () in
+            // If the camera view is already running an ARSession, piggyback
+            // on it instead of creating a competing one.
+            if SharedARSession.shared.viewSession != nil {
+                return
+            }
+
             guard ARWorldTrackingConfiguration.supportsFrameSemantics(.sceneDepth) else {
                 throw LiDARError.notSupported
             }
@@ -46,6 +59,10 @@ public class LiDARSessionModule: Module {
         }
 
         AsyncFunction("stopSession") { () in
+            // Don't pause the view's session — only clean up if we own it.
+            if SharedARSession.shared.viewSession != nil {
+                return
+            }
             self.arSession?.pause()
             self.arSession = nil
             self.sessionDelegate = nil
@@ -54,7 +71,7 @@ public class LiDARSessionModule: Module {
         // MARK: - Depth Frame Capture
 
         AsyncFunction("captureDepthFrame") { () -> [String: Any]? in
-            guard let frame = self.arSession?.currentFrame else { return nil }
+            guard let frame = self.activeSession?.currentFrame else { return nil }
             guard let depthMap = frame.smoothedSceneDepth?.depthMap ?? frame.sceneDepth?.depthMap else {
                 return nil
             }
@@ -67,6 +84,15 @@ public class LiDARSessionModule: Module {
 
             guard let cPath = colorPath, let dPath = depthPath else { return nil }
 
+            // Camera pose: 4x4 column-major transform (world space)
+            let t = frame.camera.transform
+            let pose: [Float] = [
+                t.columns.0.x, t.columns.0.y, t.columns.0.z, t.columns.0.w,
+                t.columns.1.x, t.columns.1.y, t.columns.1.z, t.columns.1.w,
+                t.columns.2.x, t.columns.2.y, t.columns.2.z, t.columns.2.w,
+                t.columns.3.x, t.columns.3.y, t.columns.3.z, t.columns.3.w
+            ]
+
             return [
                 "colorImagePath": cPath,
                 "depthMapPath": dPath,
@@ -76,6 +102,7 @@ public class LiDARSessionModule: Module {
                     intrinsics.columns.2.x,
                     intrinsics.columns.2.y
                 ],
+                "pose": pose,
                 "timestamp": frame.timestamp
             ]
         }
@@ -85,7 +112,7 @@ public class LiDARSessionModule: Module {
         AsyncFunction("measureRegion") {
             (x: Double, y: Double, width: Double, height: Double) -> [String: Any]? in
 
-            guard let frame = self.arSession?.currentFrame else { return nil }
+            guard let frame = self.activeSession?.currentFrame else { return nil }
             guard let depthMap = frame.smoothedSceneDepth?.depthMap ?? frame.sceneDepth?.depthMap else {
                 return nil
             }
@@ -115,7 +142,7 @@ public class LiDARSessionModule: Module {
         AsyncFunction("exportMesh") {
             (x: Double, y: Double, width: Double, height: Double) -> String? in
 
-            guard let frame = self.arSession?.currentFrame else { return nil }
+            guard let frame = self.activeSession?.currentFrame else { return nil }
 
             let meshAnchors = frame.anchors.compactMap { $0 as? ARMeshAnchor }
             guard !meshAnchors.isEmpty else { return nil }

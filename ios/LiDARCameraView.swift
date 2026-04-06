@@ -36,6 +36,13 @@ class LiDARCameraView: ExpoView {
 
     // MARK: - Setup
 
+    deinit {
+        // Unregister so the module knows the view's session is gone
+        if SharedARSession.shared.viewSession === arView?.session {
+            SharedARSession.shared.viewSession = nil
+        }
+    }
+
     private func setupARView() {
         let view = ARView(frame: bounds)
         view.automaticallyConfigureSession = false
@@ -51,6 +58,10 @@ class LiDARCameraView: ExpoView {
             }
             view.session.run(config)
             view.session.delegate = self
+
+            // Share this session so the module can capture frames without
+            // creating a competing session that freezes the preview.
+            SharedARSession.shared.viewSession = view.session
         }
     }
 

@@ -69,7 +69,7 @@ class MeshExporter {
             }
 
             let faceIndicesPerFace = faces.indexCountPerPrimitive
-            let indexBuffer = faces.buffer.contents().advanced(by: faces.offset)
+            let indexBuffer = faces.buffer.contents()
 
             for f in 0..<faces.count {
                 var faceIndices: [Int] = []

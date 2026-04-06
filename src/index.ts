@@ -1,5 +1,4 @@
-import { NativeModulesProxy, EventEmitter } from 'expo-modules-core';
-import { requireNativeViewManager } from 'expo-modules-core';
+import { EventEmitter, NativeModulesProxy, requireNativeViewManager } from 'expo-modules-core';
 import { Platform } from 'react-native';
 
 const ExpoLidar = NativeModulesProxy.ExpoLidar;
@@ -34,6 +33,8 @@ export interface DepthFrame {
   depthMapPath: string;
   /** Camera intrinsics: [fx, fy, cx, cy]. */
   intrinsics: [number, number, number, number];
+  /** Camera pose: 4x4 column-major transform matrix (16 floats, world space). */
+  pose: number[];
   /** ARFrame timestamp. */
   timestamp: number;
 }
