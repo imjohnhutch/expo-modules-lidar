@@ -68,6 +68,16 @@ public class LiDARSessionModule: Module {
             self.sessionDelegate = nil
         }
 
+        // Reset the world origin to the device's current pose without tearing
+        // down the camera preview. Re-runs whichever session is active.
+        AsyncFunction("resetTracking") { () in
+            guard let session = self.activeSession,
+                  let config = session.configuration else {
+                throw LiDARError.sessionNotRunning
+            }
+            session.run(config, options: [.resetTracking, .removeExistingAnchors])
+        }
+
         // MARK: - Depth Frame Capture
 
         AsyncFunction("captureDepthFrame") { () -> [String: Any]? in

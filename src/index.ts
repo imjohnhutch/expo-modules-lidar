@@ -92,6 +92,15 @@ export async function stopSession(): Promise<void> {
 }
 
 /**
+ * Reset the AR world origin to the device's current pose without tearing
+ * down the camera preview. Call at the start of each scan to give every
+ * scan its own coordinate system.
+ */
+export async function resetTracking(): Promise<void> {
+  return ExpoLidar.resetTracking();
+}
+
+/**
  * Capture the current depth-aligned frame (color image + depth map).
  * Files are saved to the app's temporary directory.
  */
