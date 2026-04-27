@@ -79,11 +79,25 @@ export async function isSupported(): Promise<boolean> {
 }
 
 /**
+ * AR world coordinate alignment.
+ *
+ * - `"camera"` (default): the world frame matches the camera's orientation
+ *   at session start, so the first frame's pose is identity regardless of
+ *   how the device is held. Best when you want reproducible scan geometry.
+ * - `"gravity"`: the world Y-axis is locked to real-world up. The device's
+ *   pitch/roll at session start carry over into the camera's pose, which
+ *   makes the first-frame viewing angle depend on how the device is held.
+ */
+export type WorldAlignment = "camera" | "gravity";
+
+/**
  * Start an AR session with scene depth and mesh reconstruction enabled.
  * Throws if LiDAR is not supported.
+ *
+ * @param worldAlignment Coordinate-frame convention. Defaults to `"camera"`.
  */
-export async function startSession(): Promise<void> {
-  return ExpoLidar.startSession();
+export async function startSession(worldAlignment: WorldAlignment = "camera"): Promise<void> {
+  return ExpoLidar.startSession(worldAlignment);
 }
 
 /** Pause and tear down the AR session. */

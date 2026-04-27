@@ -13,6 +13,10 @@ public class LiDARCameraViewModule: Module {
                 view.setOverlayOpacity(CGFloat(opacity))
             }
 
+            Prop("worldAlignment") { (view: LiDARCameraView, value: String) in
+                view.setWorldAlignment(value)
+            }
+
             Events("onRegionSelected")
         }
     }

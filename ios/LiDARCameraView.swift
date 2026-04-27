@@ -12,6 +12,7 @@ class LiDARCameraView: ExpoView {
     private var panStartPoint: CGPoint = .zero
     private var isShowingDepthOverlay = false
     private var currentOverlayOpacity: CGFloat = 0.5
+    private var currentWorldAlignment: ARConfiguration.WorldAlignment = .camera
 
     let onRegionSelected = EventDispatcher()
 
@@ -51,18 +52,23 @@ class LiDARCameraView: ExpoView {
         arView = view
 
         if ARWorldTrackingConfiguration.supportsFrameSemantics(.sceneDepth) {
-            let config = ARWorldTrackingConfiguration()
-            config.frameSemantics = [.sceneDepth, .smoothedSceneDepth]
-            if ARWorldTrackingConfiguration.supportsSceneReconstruction(.meshWithClassification) {
-                config.sceneReconstruction = .meshWithClassification
-            }
-            view.session.run(config)
+            view.session.run(buildConfig())
             view.session.delegate = self
 
             // Share this session so the module can capture frames without
             // creating a competing session that freezes the preview.
             SharedARSession.shared.viewSession = view.session
         }
+    }
+
+    private func buildConfig() -> ARWorldTrackingConfiguration {
+        let config = ARWorldTrackingConfiguration()
+        config.frameSemantics = [.sceneDepth, .smoothedSceneDepth]
+        if ARWorldTrackingConfiguration.supportsSceneReconstruction(.meshWithClassification) {
+            config.sceneReconstruction = .meshWithClassification
+        }
+        config.worldAlignment = currentWorldAlignment
+        return config
     }
 
     private func setupDepthOverlay() {
@@ -100,6 +106,18 @@ class LiDARCameraView: ExpoView {
         currentOverlayOpacity = opacity
         if isShowingDepthOverlay {
             depthOverlayView?.alpha = opacity
+        }
+    }
+
+    /// Set the AR world alignment ("camera" or "gravity"). If different from
+    /// the current value, the running session is reset with the new config.
+    func setWorldAlignment(_ value: String) {
+        let alignment: ARConfiguration.WorldAlignment =
+            value.lowercased() == "gravity" ? .gravity : .camera
+        guard alignment != currentWorldAlignment else { return }
+        currentWorldAlignment = alignment
+        if let session = arView?.session {
+            session.run(buildConfig(), options: [.resetTracking, .removeExistingAnchors])
         }
     }
 

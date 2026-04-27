@@ -30,7 +30,7 @@ public class LiDARSessionModule: Module {
 
         // MARK: - Session Lifecycle
 
-        AsyncFunction("startSession") { () in
+        AsyncFunction("startSession") { (worldAlignment: String?) in
             // If the camera view is already running an ARSession, piggyback
             // on it instead of creating a competing one.
             if SharedARSession.shared.viewSession != nil {
@@ -47,6 +47,8 @@ public class LiDARSessionModule: Module {
                 config.sceneReconstruction = .meshWithClassification
             }
             config.environmentTexturing = .automatic
+            config.worldAlignment =
+                worldAlignment?.lowercased() == "gravity" ? .gravity : .camera
 
             let session = ARSession()
             let delegate = LiDARSessionDelegate(module: self)
